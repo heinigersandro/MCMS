@@ -1,0 +1,10 @@
+useDynLib(MCMS)
+
+import(R.utils)
+import(Rcpp)
+import(RcppEigen)
+
+export(mcms_lam_range)
+export(mcms_fit)
+export(mcms_cv)
+export(mcms_lambda_analysis)

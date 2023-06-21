@@ -1,0 +1,15 @@
+Package: MCMS
+Type: Package
+Title: Matrix completion methods with model selection
+Version: 0.1
+Date: 2023-04-24
+Author: Sandro Heiniger
+Maintainer: Sandro Heiniger <sandroheiniger@gmail.com>
+Description: Implements the Matrix completion method for causal inference by Athey et al. and extends it with covariate regularization for data-driven model selection.
+License: GPL (>= 2)
+Imports: R.utils, Rcpp, RcppEigen
+LinkingTo: Rcpp, RcppEigen
+RoxygenNote: 7.2.3
+SystemRequirements: GNU make
+NeedsCompilation: yes
+Packaged: 2023-04-23 11:50:54 UTC
