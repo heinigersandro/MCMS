@@ -9,7 +9,7 @@ To install this package in R, run the following commands:
 ```R
 install.packages("devtools")
 library(devtools) 
-install_github("sandroheiniger/MCMS")
+install_github("heinigersandro/MCMS")
 ```
 
 #### Version
