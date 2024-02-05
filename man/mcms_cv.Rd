@@ -7,11 +7,11 @@ If post_estimation is set, then the estimated parameters are returned additional
 \usage{
 mcms_cv(
   M,
-  X,
-  Z,
-  B,
   mask,
-  num_B_cov,
+  X = NA,
+  Z = NA,
+  B = NA,
+  num_B_cov = NA,
   to_add_ID = TRUE,
   to_estimate_u = TRUE,
   to_estimate_v = TRUE,
@@ -21,12 +21,15 @@ mcms_cv(
   rel_tol = 1e-05,
   to_normalize = TRUE,
   cv_ratio = NA,
-  cv_criterion = "mse",
+  cv_criterion = "1se",
   num_folds = 3,
   n_config = 150,
   cube_search = TRUE,
   is_quiet = TRUE,
   post_estimation = TRUE,
+  impose_null = TRUE,
+  permutation_inference = "all",
+  permutation_max = 1000,
   model_selection_H = TRUE,
   model_selection_b = TRUE,
   seed = NA
@@ -35,15 +38,15 @@ mcms_cv(
 \arguments{
 \item{M}{Outcome matrix}
 
-\item{X}{Units covariate matrix (Time-invariant)}
-
-\item{Z}{Time covariate matrix (Unit-invariant)}
-
-\item{B}{Unit-Time covariate matrix}
-
 \item{mask}{Treatment mask matrix (1 if control, 0 if treated)}
 
-\item{num_B_cov}{Number of unit-time covariates}
+\item{X}{Units covariate matrix (Time-invariant) (default: NA)}
+
+\item{Z}{Time covariate matrix (Unit-invariant) (default: NA)}
+
+\item{B}{Unit-Time covariate matrix (default: NA)}
+
+\item{num_B_cov}{Number of unit-time covariates (default: NA)}
 
 \item{to_add_ID}{Whether to add an identity matrix to the X and Z matrices. (default: TRUE)}
 
@@ -77,6 +80,12 @@ If set to false, lambda values are spaned on a grid.}
 
 \item{post_estimation}{Whether a post regularization estimation without regularization should be estimated. (default: TRUE)}
 
+\item{impose_null}{Whether null-hypothesis should be imposed. Implies that all observations also treated observations are used in model estimation. (default: TRUE)}
+
+\item{permutation_inference}{Permutation setting for inference procedure. Either "block-moving" under stationarity assumption, "all" under iid assumption or NA if no inference procedure should be executed. Is only possible if impose_null is set to TRUE. (default: "all")}
+
+\item{permutation_max}{Maximum of evaluated permutations. If NA, all possible permutations are considered (default: NA)}
+
 \item{model_selection_H}{Whether the unit and time varying covariate link matrix should be regularized. (default: TRUE)}
 
 \item{model_selection_b}{Whether the unit-time varying covariates parameters should be regularized. (default: TRUE)}
@@ -90,6 +99,7 @@ If set to false, lambda values are spaned on a grid.}
 		- "B": Estimated unit-time covariates' coefficients
 		- "H": Estimated H matrix
 		- "tau": The estimate treatment effect
+		- "tau_rot": The rule-of-thumb corrected estimate of the treatment effect
 		- "lambda_L": Estimated lambda_L value
 		- "lambda_H": Estimated lambda_H value
 		- "lambda_b": Estimated lambda_b value

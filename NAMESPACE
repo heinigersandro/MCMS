@@ -3,6 +3,7 @@ useDynLib(MCMS)
 import(R.utils)
 import(Rcpp)
 import(RcppEigen)
+import(gbutils)
 
 export(mcms_lam_range)
 export(mcms_fit)

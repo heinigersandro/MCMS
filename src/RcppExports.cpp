@@ -35,8 +35,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // mc_ms_fit
-List mc_ms_fit(NumericMatrix M, NumericMatrix X, NumericMatrix Z, NumericMatrix B, NumericMatrix mask, double lambda_L, double lambda_H, double lambda_b, int num_B_cov, bool to_add_ID, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, int niter, double rel_tol, bool to_normalize, bool is_quiet, bool post_estimation);
-RcppExport SEXP _MCMS_mc_ms_fit(SEXP MSEXP, SEXP XSEXP, SEXP ZSEXP, SEXP BSEXP, SEXP maskSEXP, SEXP lambda_LSEXP, SEXP lambda_HSEXP, SEXP lambda_bSEXP, SEXP num_B_covSEXP, SEXP to_add_IDSEXP, SEXP to_estimate_uSEXP, SEXP to_estimate_vSEXP, SEXP to_estimate_bSEXP, SEXP to_estimate_HSEXP, SEXP niterSEXP, SEXP rel_tolSEXP, SEXP to_normalizeSEXP, SEXP is_quietSEXP, SEXP post_estimationSEXP) {
+List mc_ms_fit(NumericMatrix M, NumericMatrix X, NumericMatrix Z, NumericMatrix B, NumericMatrix mask, double lambda_L, double lambda_H, double lambda_b, int num_B_cov, bool to_add_ID, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, int niter, double rel_tol, bool to_normalize, bool is_quiet, bool post_estimation, bool impose_null, bool model_selection_H, bool model_selection_b);
+RcppExport SEXP _MCMS_mc_ms_fit(SEXP MSEXP, SEXP XSEXP, SEXP ZSEXP, SEXP BSEXP, SEXP maskSEXP, SEXP lambda_LSEXP, SEXP lambda_HSEXP, SEXP lambda_bSEXP, SEXP num_B_covSEXP, SEXP to_add_IDSEXP, SEXP to_estimate_uSEXP, SEXP to_estimate_vSEXP, SEXP to_estimate_bSEXP, SEXP to_estimate_HSEXP, SEXP niterSEXP, SEXP rel_tolSEXP, SEXP to_normalizeSEXP, SEXP is_quietSEXP, SEXP post_estimationSEXP, SEXP impose_nullSEXP, SEXP model_selection_HSEXP, SEXP model_selection_bSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -59,13 +59,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type to_normalize(to_normalizeSEXP);
     Rcpp::traits::input_parameter< bool >::type is_quiet(is_quietSEXP);
     Rcpp::traits::input_parameter< bool >::type post_estimation(post_estimationSEXP);
-    rcpp_result_gen = Rcpp::wrap(mc_ms_fit(M, X, Z, B, mask, lambda_L, lambda_H, lambda_b, num_B_cov, to_add_ID, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, niter, rel_tol, to_normalize, is_quiet, post_estimation));
+    Rcpp::traits::input_parameter< bool >::type impose_null(impose_nullSEXP);
+    Rcpp::traits::input_parameter< bool >::type model_selection_H(model_selection_HSEXP);
+    Rcpp::traits::input_parameter< bool >::type model_selection_b(model_selection_bSEXP);
+    rcpp_result_gen = Rcpp::wrap(mc_ms_fit(M, X, Z, B, mask, lambda_L, lambda_H, lambda_b, num_B_cov, to_add_ID, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, niter, rel_tol, to_normalize, is_quiet, post_estimation, impose_null, model_selection_H, model_selection_b));
     return rcpp_result_gen;
 END_RCPP
 }
 // mc_ms_cv
-List mc_ms_cv(NumericMatrix M, NumericMatrix X, NumericMatrix Z, NumericMatrix B, NumericMatrix mask, int num_B_cov, bool to_add_ID, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, int niter, double rel_tol, bool to_normalize, double cv_ratio, int num_folds, int n_config, bool cube_search, bool is_quiet, bool post_estimation, bool model_selection_H, bool model_selection_b, bool return_mse, bool return_1se, int seed);
-RcppExport SEXP _MCMS_mc_ms_cv(SEXP MSEXP, SEXP XSEXP, SEXP ZSEXP, SEXP BSEXP, SEXP maskSEXP, SEXP num_B_covSEXP, SEXP to_add_IDSEXP, SEXP to_estimate_uSEXP, SEXP to_estimate_vSEXP, SEXP to_estimate_bSEXP, SEXP to_estimate_HSEXP, SEXP niterSEXP, SEXP rel_tolSEXP, SEXP to_normalizeSEXP, SEXP cv_ratioSEXP, SEXP num_foldsSEXP, SEXP n_configSEXP, SEXP cube_searchSEXP, SEXP is_quietSEXP, SEXP post_estimationSEXP, SEXP model_selection_HSEXP, SEXP model_selection_bSEXP, SEXP return_mseSEXP, SEXP return_1seSEXP, SEXP seedSEXP) {
+List mc_ms_cv(NumericMatrix M, NumericMatrix X, NumericMatrix Z, NumericMatrix B, NumericMatrix mask, int num_B_cov, bool to_add_ID, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, int niter, double rel_tol, bool to_normalize, double cv_ratio, int num_folds, int n_config, bool cube_search, bool is_quiet, bool post_estimation, bool impose_null, bool model_selection_H, bool model_selection_b, bool return_mse, bool return_1se, int seed);
+RcppExport SEXP _MCMS_mc_ms_cv(SEXP MSEXP, SEXP XSEXP, SEXP ZSEXP, SEXP BSEXP, SEXP maskSEXP, SEXP num_B_covSEXP, SEXP to_add_IDSEXP, SEXP to_estimate_uSEXP, SEXP to_estimate_vSEXP, SEXP to_estimate_bSEXP, SEXP to_estimate_HSEXP, SEXP niterSEXP, SEXP rel_tolSEXP, SEXP to_normalizeSEXP, SEXP cv_ratioSEXP, SEXP num_foldsSEXP, SEXP n_configSEXP, SEXP cube_searchSEXP, SEXP is_quietSEXP, SEXP post_estimationSEXP, SEXP impose_nullSEXP, SEXP model_selection_HSEXP, SEXP model_selection_bSEXP, SEXP return_mseSEXP, SEXP return_1seSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -89,18 +92,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type cube_search(cube_searchSEXP);
     Rcpp::traits::input_parameter< bool >::type is_quiet(is_quietSEXP);
     Rcpp::traits::input_parameter< bool >::type post_estimation(post_estimationSEXP);
+    Rcpp::traits::input_parameter< bool >::type impose_null(impose_nullSEXP);
     Rcpp::traits::input_parameter< bool >::type model_selection_H(model_selection_HSEXP);
     Rcpp::traits::input_parameter< bool >::type model_selection_b(model_selection_bSEXP);
     Rcpp::traits::input_parameter< bool >::type return_mse(return_mseSEXP);
     Rcpp::traits::input_parameter< bool >::type return_1se(return_1seSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(mc_ms_cv(M, X, Z, B, mask, num_B_cov, to_add_ID, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, niter, rel_tol, to_normalize, cv_ratio, num_folds, n_config, cube_search, is_quiet, post_estimation, model_selection_H, model_selection_b, return_mse, return_1se, seed));
+    rcpp_result_gen = Rcpp::wrap(mc_ms_cv(M, X, Z, B, mask, num_B_cov, to_add_ID, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, niter, rel_tol, to_normalize, cv_ratio, num_folds, n_config, cube_search, is_quiet, post_estimation, impose_null, model_selection_H, model_selection_b, return_mse, return_1se, seed));
     return rcpp_result_gen;
 END_RCPP
 }
 // mc_ms_lambda_analysis
-int mc_ms_lambda_analysis(NumericMatrix M, NumericMatrix X, NumericMatrix Z, NumericMatrix B, NumericMatrix mask, String file_path, int num_B_cov, bool to_normalize, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, bool to_add_ID, int niter, int n_config, double rel_tol, bool is_quiet, int n_lambda, double cv_ratio, int num_folds, bool cube_search, bool post_estimation, bool model_selection_H, bool model_selection_b, int seed, bool write_to_file, int iter_lambda);
-RcppExport SEXP _MCMS_mc_ms_lambda_analysis(SEXP MSEXP, SEXP XSEXP, SEXP ZSEXP, SEXP BSEXP, SEXP maskSEXP, SEXP file_pathSEXP, SEXP num_B_covSEXP, SEXP to_normalizeSEXP, SEXP to_estimate_uSEXP, SEXP to_estimate_vSEXP, SEXP to_estimate_bSEXP, SEXP to_estimate_HSEXP, SEXP to_add_IDSEXP, SEXP niterSEXP, SEXP n_configSEXP, SEXP rel_tolSEXP, SEXP is_quietSEXP, SEXP n_lambdaSEXP, SEXP cv_ratioSEXP, SEXP num_foldsSEXP, SEXP cube_searchSEXP, SEXP post_estimationSEXP, SEXP model_selection_HSEXP, SEXP model_selection_bSEXP, SEXP seedSEXP, SEXP write_to_fileSEXP, SEXP iter_lambdaSEXP) {
+int mc_ms_lambda_analysis(NumericMatrix M, NumericMatrix X, NumericMatrix Z, NumericMatrix B, NumericMatrix mask, String file_path, int num_B_cov, bool to_normalize, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, bool to_add_ID, int niter, int n_config, double rel_tol, bool is_quiet, int n_lambda, double cv_ratio, int num_folds, bool cube_search, bool post_estimation, bool impose_null, bool model_selection_H, bool model_selection_b, int seed, bool write_to_file, int iter_lambda);
+RcppExport SEXP _MCMS_mc_ms_lambda_analysis(SEXP MSEXP, SEXP XSEXP, SEXP ZSEXP, SEXP BSEXP, SEXP maskSEXP, SEXP file_pathSEXP, SEXP num_B_covSEXP, SEXP to_normalizeSEXP, SEXP to_estimate_uSEXP, SEXP to_estimate_vSEXP, SEXP to_estimate_bSEXP, SEXP to_estimate_HSEXP, SEXP to_add_IDSEXP, SEXP niterSEXP, SEXP n_configSEXP, SEXP rel_tolSEXP, SEXP is_quietSEXP, SEXP n_lambdaSEXP, SEXP cv_ratioSEXP, SEXP num_foldsSEXP, SEXP cube_searchSEXP, SEXP post_estimationSEXP, SEXP impose_nullSEXP, SEXP model_selection_HSEXP, SEXP model_selection_bSEXP, SEXP seedSEXP, SEXP write_to_fileSEXP, SEXP iter_lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -126,21 +130,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type num_folds(num_foldsSEXP);
     Rcpp::traits::input_parameter< bool >::type cube_search(cube_searchSEXP);
     Rcpp::traits::input_parameter< bool >::type post_estimation(post_estimationSEXP);
+    Rcpp::traits::input_parameter< bool >::type impose_null(impose_nullSEXP);
     Rcpp::traits::input_parameter< bool >::type model_selection_H(model_selection_HSEXP);
     Rcpp::traits::input_parameter< bool >::type model_selection_b(model_selection_bSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< bool >::type write_to_file(write_to_fileSEXP);
     Rcpp::traits::input_parameter< int >::type iter_lambda(iter_lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(mc_ms_lambda_analysis(M, X, Z, B, mask, file_path, num_B_cov, to_normalize, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, to_add_ID, niter, n_config, rel_tol, is_quiet, n_lambda, cv_ratio, num_folds, cube_search, post_estimation, model_selection_H, model_selection_b, seed, write_to_file, iter_lambda));
+    rcpp_result_gen = Rcpp::wrap(mc_ms_lambda_analysis(M, X, Z, B, mask, file_path, num_B_cov, to_normalize, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, to_add_ID, niter, n_config, rel_tol, is_quiet, n_lambda, cv_ratio, num_folds, cube_search, post_estimation, impose_null, model_selection_H, model_selection_b, seed, write_to_file, iter_lambda));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_MCMS_mc_ms_lam_range", (DL_FUNC) &_MCMS_mc_ms_lam_range, 13},
-    {"_MCMS_mc_ms_fit", (DL_FUNC) &_MCMS_mc_ms_fit, 19},
-    {"_MCMS_mc_ms_cv", (DL_FUNC) &_MCMS_mc_ms_cv, 25},
-    {"_MCMS_mc_ms_lambda_analysis", (DL_FUNC) &_MCMS_mc_ms_lambda_analysis, 27},
+    {"_MCMS_mc_ms_fit", (DL_FUNC) &_MCMS_mc_ms_fit, 22},
+    {"_MCMS_mc_ms_cv", (DL_FUNC) &_MCMS_mc_ms_cv, 26},
+    {"_MCMS_mc_ms_lambda_analysis", (DL_FUNC) &_MCMS_mc_ms_lambda_analysis, 28},
     {NULL, NULL, 0}
 };
 

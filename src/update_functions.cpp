@@ -261,8 +261,10 @@ double Compute_MSE(const MatrixXd &M, const MatrixXd &X, const MatrixXd &Z, Matr
 
 	// Number of observed control observations in the training set
     double valid_size = mask.sum();
+
 	// Calculate the error matrix
     ArrayXXd err_mask = Compute_err_Mat(M, mask, L, X, Z, H, B, u, v, b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H);
+
     // Calculate the mean squared error
 	double res = (err_mask * err_mask).sum() / valid_size;
     return res;
@@ -295,8 +297,7 @@ double Compute_MSE(const MatrixXd &M, const MatrixXd &X, const MatrixXd &Z, Matr
 	* @param lambda_b: regularization parameter for the element-wise l1 norm of b
 	* @return: (double) MSE plus nuclear norm of L and also element-wise l1 norm of H and b
 */
-double Compute_objval(const MatrixXd &M, const MatrixXd &X, const MatrixXd &Z, MatrixXd &H, const std::vector<MatrixXd> &B, const MatrixXd &mask, MatrixXd &L, VectorXd &u, VectorXd &v, VectorXd &b, double sum_sing_vals, double lambda_L, double lambda_H, double lambda_b, int num_rows, int num_cols, int H_rows, int H_cols, int H_rows_bef, int H_cols_bef, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H) {
-
+double Compute_objval(const MatrixXd &M, const MatrixXd &X, const MatrixXd &Z, MatrixXd &H, const std::vector<MatrixXd> &B, const MatrixXd &mask, MatrixXd &L, VectorXd &u, VectorXd &v, VectorXd &b, double sum_sing_vals, double lambda_L, double lambda_H, double lambda_b, int num_rows, int num_cols, int H_rows, int H_cols, int H_rows_bef, int H_cols_bef, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, bool model_selection_H, bool model_selection_b) {
 	// Calculate the mean squared error
     double obj_val = Compute_MSE(M, X, Z, H, B, mask, L, u, v, b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H);
 
@@ -304,10 +305,10 @@ double Compute_objval(const MatrixXd &M, const MatrixXd &X, const MatrixXd &Z, M
     obj_val+=lambda_L * sum_sing_vals;
 
 	// account for the l1 norm of H and b
-	if(to_estimate_H){
+	if(model_selection_H){
 		obj_val+=lambda_H*(H.array().abs().sum());
 	}
-    if(to_estimate_b){
+    if(model_selection_b){
     	obj_val+=lambda_b*(b.array().abs().sum());
     }
 
@@ -695,8 +696,11 @@ std::tuple<VectorXd, VectorXd, double, double, double, MatrixXd, std::vector<dou
 	// for the determination of the max lambda values, b and H are not estimated
     bool to_estimate_b=false;
     bool to_estimate_H=false;
+    bool model_selection_H=false;
+    bool model_selection_b=false;
+
 	// initial objective function value
-    obj_val = Compute_objval(M, X, Z, H, B, mask, L, u, v, b, sum_sigma, lambda_L, lambda_H, lambda_b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H);
+    obj_val = Compute_objval(M, X, Z, H, B, mask, L, u, v, b, sum_sigma, lambda_L, lambda_H, lambda_b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, model_selection_H, model_selection_b);
     for (int iter = 0; iter < niter; iter++) {
     	// iterate only over fixed effects u and v
 		if (to_estimate_u) {
@@ -707,7 +711,7 @@ std::tuple<VectorXd, VectorXd, double, double, double, MatrixXd, std::vector<dou
 		}
 
 		// Check if accuracy is achieved
-		new_obj_val = Compute_objval(M, X, Z, H, B, mask, L, u, v, b, sum_sigma, lambda_L, lambda_H, lambda_b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H);
+		new_obj_val = Compute_objval(M, X, Z, H, B, mask, L, u, v, b, sum_sigma, lambda_L, lambda_H, lambda_b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, model_selection_H, model_selection_b);
 		double rel_error = (obj_val - new_obj_val) / obj_val;
 		if (std::abs(rel_error) < rel_tol) {
 			break;
@@ -860,7 +864,7 @@ std::vector<std::tuple<VectorXd, VectorXd, double, double, double, MatrixXd, std
 	* @param is_quiet: boolean indicating whether to print progress or not
 	* @return: tuple containing L, H, u, v, b, MSE, and the final iteration number
 */
-std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double> NNM_fit(const MatrixXd &M, const MatrixXd &X, const MatrixXd &Z, const std::vector<MatrixXd> &B, MatrixXd H, MatrixXd &X2Z2sum, const MatrixXd &mask, MatrixXd L, VectorXd u, VectorXd v, VectorXd b, int num_rows, int num_cols, int H_rows, int H_cols, int H_rows_bef, int H_cols_bef, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, int num_B_cov, int niter, double rel_tol, double lambda_L, double lambda_H, double lambda_b, std::vector<double> Vtik2_vec, ArrayXd& sing_restrict, bool is_quiet) {
+std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double> NNM_fit(const MatrixXd &M, const MatrixXd &X, const MatrixXd &Z, const std::vector<MatrixXd> &B, MatrixXd H, MatrixXd &X2Z2sum, const MatrixXd &mask, MatrixXd L, VectorXd u, VectorXd v, VectorXd b, int num_rows, int num_cols, int H_rows, int H_cols, int H_rows_bef, int H_cols_bef, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, int num_B_cov, int niter, double rel_tol, double lambda_L, double lambda_H, double lambda_b, std::vector<double> Vtik2_vec, ArrayXd& sing_restrict, bool is_quiet, bool model_selection_H, bool model_selection_b) {
 
 	// initialize variables
     double obj_val;
@@ -876,7 +880,7 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double> NNM_fit(con
 	VectorXi b_zero = VectorXi::Ones(num_B_cov);
 
 	// compute initial value of the objective function
-    obj_val = Compute_objval(M, X, Z, H, B, mask, L, u, v, b, sum_sigma, lambda_L, lambda_H, lambda_b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H);
+    obj_val = Compute_objval(M, X, Z, H, B, mask, L, u, v, b, sum_sigma, lambda_L, lambda_H, lambda_b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, model_selection_H, model_selection_b);
     int finished_iter = 0;
 
 	// perform cyclic coordinate descent updates
@@ -901,10 +905,9 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double> NNM_fit(con
         // Update L
         std::tie(L, sing) = update_L(M, X, Z, H, B, mask, L, u, v, b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, sing_restrict, lambda_L);
 
-
         double sum_sigma = sing.sum();
         // Check if accuracy is achieved
-        new_obj_val = Compute_objval(M, X, Z, H, B, mask, L, u, v, b, sum_sigma, lambda_L, lambda_H, lambda_b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H);
+        new_obj_val = Compute_objval(M, X, Z, H, B, mask, L, u, v, b, sum_sigma, lambda_L, lambda_H, lambda_b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, model_selection_H, model_selection_b);
         double rel_error = (obj_val - new_obj_val) / obj_val;
         finished_iter=iter;
         if ((std::abs(rel_error) < rel_tol) || double_zero(new_obj_val)) {
@@ -950,7 +953,7 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double> NNM_fit(con
 	* @param is_quiet: boolean indicating whether to print the progress of the algorithm
  	* @return: tuple containing the estimated matrices L, H, u, v, b, MSE, and the number of iterations
 */
-std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>> NNM_with_uv_init(const MatrixXd &M, MatrixXd &L_init, const MatrixXd &X, MatrixXd &H_init, const MatrixXd &Z, const std::vector<MatrixXd> &B, MatrixXd &X2Z2sum, const MatrixXd &mask, VectorXd &u_init, VectorXd &v_init, VectorXd &b_init, std::vector<std::tuple<double, double, double>> lambda_tuples, int num_rows, int num_cols, int H_rows, int H_cols, int H_rows_bef, int H_cols_bef, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, int num_B_cov, int niter, double rel_tol, std::vector<double> Vtik2_vec, ArrayXd& sing_restrict, bool is_quiet) {
+std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>> NNM_with_uv_init(const MatrixXd &M, MatrixXd &L_init, const MatrixXd &X, MatrixXd &H_init, const MatrixXd &Z, const std::vector<MatrixXd> &B, MatrixXd &X2Z2sum, const MatrixXd &mask, VectorXd &u_init, VectorXd &v_init, VectorXd &b_init, std::vector<std::tuple<double, double, double>> lambda_tuples, int num_rows, int num_cols, int H_rows, int H_cols, int H_rows_bef, int H_cols_bef, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, int num_B_cov, int niter, double rel_tol, std::vector<double> Vtik2_vec, ArrayXd& sing_restrict, bool is_quiet, bool model_selection_H, bool model_selection_b) {
 
     int n_tuples = lambda_tuples.size();
     std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>> res(n_tuples);
@@ -963,7 +966,7 @@ std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>
 	    double lambda_H, lambda_L, lambda_b;
 		std::tie(lambda_H, lambda_L, lambda_b)=lambda_tuples[i];
 		// Call the NNM algorithm with the initial values for L, H, u, v, and b and the current lambda configuration.
-		res[i] = NNM_fit(M, X, Z, B, H_init, X2Z2sum, mask, L_init, u_init, v_init, b_init, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, lambda_L, lambda_H, lambda_b, Vtik2_vec, sing_restrict, is_quiet);
+		res[i] = NNM_fit(M, X, Z, B, H_init, X2Z2sum, mask, L_init, u_init, v_init, b_init, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, lambda_L, lambda_H, lambda_b, Vtik2_vec, sing_restrict, is_quiet, model_selection_H, model_selection_b);
     }
     return res;
 }
@@ -1016,13 +1019,13 @@ std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>
 	* 			- min_lambda_L_1se: optimal lambda_L value for 1se condition
 	* 			- min_lambda_b_1se: optimal lambda_b value for 1se condition
 */
-std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, double, double, std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>, double, double, double, double, MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd> Find_optimal_lambda(const MatrixXd &M, const MatrixXd &X, const MatrixXd &Z, const std::vector<MatrixXd> &B, const MatrixXd &mask, int num_rows, int num_cols, int H_rows, int H_cols, int H_rows_bef, int H_cols_bef, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, int num_B_cov, int niter, double rel_tol, double cv_ratio, int num_folds, bool is_quiet, bool cube_search, int n_config, bool model_selection_H, bool model_selection_b, bool return_1se, int seed, bool is_lambda_analysis, std::string file_path_cpp, int n_lambda) {
+std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, double, double, std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>, double, double, double, double, MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd> Find_optimal_lambda(const MatrixXd &M, const MatrixXd &X, const MatrixXd &Z, const std::vector<MatrixXd> &B, const MatrixXd &mask, const MatrixXd &mask_null, int num_rows, int num_cols, int H_rows, int H_cols, int H_rows_bef, int H_cols_bef, bool to_estimate_u, bool to_estimate_v, bool to_estimate_b, bool to_estimate_H, int num_B_cov, int niter, double rel_tol, double cv_ratio, int num_folds, bool is_quiet, bool cube_search, int n_config, bool model_selection_H, bool model_selection_b, bool return_1se, int seed, bool is_lambda_analysis, std::string file_path_cpp, int n_lambda) {
 
 	if(!is_quiet){
 		std::cout << " ---> Computing max lambda values" << std::endl;
 	}
 	// Create the folds. In each fold, initial values for u,v are determined by iteration only on u,v and max lambda values are calculated
-	std::vector<std::tuple<VectorXd, VectorXd, double, double, double, MatrixXd, std::vector<double>, MatrixXd>>  confgs = create_folds(M, X, Z, B, mask, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, num_B_cov, niter, rel_tol, cv_ratio, num_folds, seed);
+	std::vector<std::tuple<VectorXd, VectorXd, double, double, double, MatrixXd, std::vector<double>, MatrixXd>>  confgs = create_folds(M, X, Z, B, mask_null, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, num_B_cov, niter, rel_tol, cv_ratio, num_folds, seed);
 
 	//initialize all the variables
 	double lam_L_max, lam_H_max, lam_b_max;
@@ -1085,7 +1088,7 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 
 		// create the validation mask
 		MatrixXd mask_validation(num_rows, num_cols);
-		mask_validation = mask.array() * (MatrixXd::Constant(num_rows, num_cols, 1.0) - mask_training).array();
+		mask_validation = mask_null.array() * (MatrixXd::Constant(num_rows, num_cols, 1.0) - mask_training).array();
 		mask_validation_vec[k] = mask_validation;
 
 		max_lam_L[k]=lam_L_max;
@@ -1097,7 +1100,7 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 		VectorXd b_init = VectorXd::Zero(num_B_cov);
 
 		// perform a once warm-start for L_init, H_init and b_init without regularization. The warm-start is performed on the first fold
-		std::tie(L_k, H_k, u_k, v_k, b_k, finished_iter_k)=NNM_fit(M, X, Z, B, H_init, X2Z2sum, mask_training, L_init, u_k, v_k, b_init, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, 2*niter, rel_tol, 0.0, 0.0, 0.0, Vtik2, sing_restrict, is_quiet);
+		std::tie(L_k, H_k, u_k, v_k, b_k, finished_iter_k)=NNM_fit(M, X, Z, B, H_init, X2Z2sum, mask_training, L_init, u_k, v_k, b_init, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, 2*niter, rel_tol, 0.0, 0.0, 0.0, Vtik2, sing_restrict, is_quiet, false, false);
 
 		VectorXd sing;
 		MatrixXd U;
@@ -1184,8 +1187,10 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 									std::tuple<double, double, double>(idx_H*range_lam_H,
 											idx_L*range_lam_L,
 											idx_b*range_lam_b));
+							if(!model_selection_b){idx_b=999;}
 						}
 					}
+					if(!model_selection_H){idx_H=999;}
 				}
 			} else {
 				// determine the number of lambda for the grid search
@@ -1239,7 +1244,7 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 		for(int k = 0; k < num_folds; k++){
 			// train all the configurations
 			std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>> train_configs_inner=NNM_with_uv_init(M, L_vec[k], X, H_vec[k], Z, B, X2Z2sum_vec[k], mask_training_vec[k], u_vec[k], v_vec[k], b_vec[k],
-					configs_to_estimate, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, Vtik2_vec[k], sing_restrict, is_quiet);
+					configs_to_estimate, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, Vtik2_vec[k], sing_restrict, is_quiet, model_selection_H, model_selection_b);
 			train_configs.insert(train_configs.end(), train_configs_inner.begin(), train_configs_inner.end());
 
 			// loop over the results and extract the information of each configuration
@@ -1352,6 +1357,9 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 				old_min_lambda_L=min_lambda_L;
 				old_min_lambda_b=min_lambda_b;
 
+				if(!model_selection_H){range_lam_H=0;}
+				if(!model_selection_b){range_lam_b=0;}
+
 				configs_to_estimate.clear();
 				for(int idx_H=-1; idx_H<=2; idx_H=(idx_H+1)*2){
 					if(double_zero(range_lam_H)){
@@ -1372,7 +1380,7 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 										double new_lambda_H=min_lambda_H+idx_H*range_lam_H;
 										double new_lambda_b=min_lambda_b+idx_b*range_lam_b;
 
-										if(!(idx_L==0 && (idx_H==0 || !model_selection_H) && (idx_b==0 || !model_selection_b)) &&
+										if(!(idx_L==0 && idx_H==0 && idx_b==0) &&
 												!(double_zero(new_lambda_L) &&  double_zero(new_lambda_H) &&  double_zero(new_lambda_b)) &&
 												(new_lambda_L>-zero_tol) &&
 												(new_lambda_H>-zero_tol) &&
@@ -1408,6 +1416,8 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 				}
 			}
 		}
+
+		if(configs_to_estimate.empty()){break;}
 	}
 
 	// retrieve the information at minimum MSE position
@@ -1468,7 +1478,7 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 		for(int k = 0; k < num_folds; k++){
 			// train all the configurations
 			std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>> train_configs=NNM_with_uv_init(M, L_vec[k], X, H_vec[k], Z, B, X2Z2sum_vec[k], mask_training_vec[k], u_vec[k], v_vec[k], b_vec[k],
-					configs_to_estimate_L, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, Vtik2_vec[k], sing_restrict, is_quiet);
+					configs_to_estimate_L, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, Vtik2_vec[k], sing_restrict, is_quiet, model_selection_H, model_selection_b);
 
 			// loop over the results and extract the information of each configuration
 			for(int i=0; i<num_1se_config; i++){
@@ -1512,10 +1522,11 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 			std::vector<double> current_MSE_H(num_1se_config,0);
 			mse_0_mean=0;
 			alternative_cv_se=0;
+
 			for(int k = 0; k < num_folds; k++){
 				// train all the configurations
 				std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>> train_configs=NNM_with_uv_init(M, L_vec[k], X, H_vec[k], Z, B, X2Z2sum_vec[k], mask_training_vec[k], u_vec[k], v_vec[k], b_vec[k],
-						configs_to_estimate_H, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, Vtik2_vec[k], sing_restrict, is_quiet);
+						configs_to_estimate_H, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, Vtik2_vec[k], sing_restrict, is_quiet, model_selection_H, model_selection_b);
 
 				// loop over the results and extract the information of each configuration
 				for(int i=0; i<num_1se_config; i++){
@@ -1539,7 +1550,6 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 
 			int position_H_1se = std::max(0,(int)std::distance(std::upper_bound(current_MSE_H.rbegin(), current_MSE_H.rend(), mse_plus_se_step, std::greater<double>()),current_MSE_H.rend())-1);
 			min_lambda_H_1se=lambda_Hs(position_H_1se);
-			//mse_plus_se_step=current_MSE_H[position_H_1se]+se_step;
 			outer_position=position_H_1se;
 		} else {
 			min_lambda_H_1se=min_lambda_H;
@@ -1565,7 +1575,7 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 			for(int k = 0; k < num_folds; k++){
 				// train all the configurations
 				std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>> train_configs=NNM_with_uv_init(M, L_vec[k], X, H_vec[k], Z, B, X2Z2sum_vec[k], mask_training_vec[k], u_vec[k], v_vec[k], b_vec[k],
-						configs_to_estimate_b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, Vtik2_vec[k], sing_restrict, is_quiet);
+						configs_to_estimate_b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, Vtik2_vec[k], sing_restrict, is_quiet, model_selection_H, model_selection_b);
 
 				// loop over the results and extract the information of each configuration
 				for(int i=0; i<num_1se_config; i++){
@@ -1653,8 +1663,8 @@ std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double, double, dou
 			VectorXd b_k;
 			double finished_iter_k;
 			ArrayXd sing_restrict_k = ArrayXd::Ones(std::min(num_rows, num_cols));
-			std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>> lambda_configs_k =NNM_with_uv_init(M, L_return, X, 		H_return, Z, B, X2Z2sum_vec[k], mask_training_vec[k], u_return, v_return, b_return,
-					configs_to_estimate, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, Vtik2_vec[k], sing_restrict_k, is_quiet);
+			std::vector<std::tuple<MatrixXd, MatrixXd, VectorXd, VectorXd, VectorXd, double>> lambda_configs_k =NNM_with_uv_init(M, L_return, X, H_return, Z, B, X2Z2sum_vec[k], mask_training_vec[k], u_return, v_return, b_return,
+					configs_to_estimate, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, niter, rel_tol, Vtik2_vec[k], sing_restrict_k, is_quiet, model_selection_H, model_selection_b);
 
 			for(int i=0; i<configs_to_estimate.size(); i++){
 				std::tie(L_k, H_k, u_k, v_k, b_k, finished_iter_k) = lambda_configs_k[i];
@@ -1729,5 +1739,5 @@ void eval_post(MatrixXd &L, MatrixXd &H, VectorXd &u, VectorXd &v, VectorXd &b, 
 
 	double finished_iter;
 	// run the NNM algorithm without regularization
-	std::tie(L, H, u, v, b, finished_iter)= NNM_fit(M, X, Z, B_vec, H, X2Z2sum, mask, L, u, v, b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, 2*niter, rel_tol, 0.0, 0.0, 0.0, Vtik2_vec, sing_restrict, is_quiet);
+	std::tie(L, H, u, v, b, finished_iter)= NNM_fit(M, X, Z, B_vec, H, X2Z2sum, mask, L, u, v, b, num_rows, num_cols, H_rows, H_cols, H_rows_bef, H_cols_bef, to_estimate_u, to_estimate_v, to_estimate_b, to_estimate_H, num_B_cov, 2*niter, rel_tol, 0.0, 0.0, 0.0, Vtik2_vec, sing_restrict, is_quiet, false, false);
 }

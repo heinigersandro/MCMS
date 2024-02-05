@@ -6,32 +6,34 @@
 \usage{
 mcms_lam_range(
   M,
-  X,
-  Z,
-  B,
   mask,
-  num_B_cov,
+  X = NA,
+  Z = NA,
+  B = NA,
+  num_B_cov = NA,
   to_add_ID = TRUE,
   to_estimate_u = TRUE,
   to_estimate_v = TRUE,
-  niter = 1e-05,
+  niter = 150,
   rel_tol = 1e-05,
   to_normalize = TRUE,
+  model_selection_H = TRUE,
+  model_selection_b = TRUE,
   is_quiet = FALSE
 )
 }
 \arguments{
 \item{M}{Outcome matrix}
 
-\item{X}{Units covariate matrix (Time-invariant)}
-
-\item{Z}{Time covariate matrix (Unit-invariant)}
-
-\item{B}{Unit-Time covariate matrix}
-
 \item{mask}{Treatment mask matrix (1 if control, 0 if treated)}
 
-\item{num_B_cov}{Number of unit-time covariates}
+\item{X}{Units covariate matrix (Time-invariant) (default: NA)}
+
+\item{Z}{Time covariate matrix (Unit-invariant) (default: NA)}
+
+\item{B}{Unit-Time covariate matrix (default: NA)}
+
+\item{num_B_cov}{Number of unit-time covariates (default: NA)}
 
 \item{to_add_ID}{Whether to add an identity matrix to the X and Z matrices. (default: TRUE)}
 
@@ -44,6 +46,10 @@ mcms_lam_range(
 \item{rel_tol}{Relative tolerance for the convergence of the coordinate descent steps. (default: 1e-5)}
 
 \item{to_normalize}{Whether to normalize the X, Z, and B matrices. (default: TRUE)}
+
+\item{model_selection_H}{Whether the unit and time varying covariate link matrix should be regularized. (default: TRUE)}
+
+\item{model_selection_b}{Whether the unit-time varying covariates parameters should be regularized. (default: TRUE)}
 
 \item{is_quiet}{Whether to print the progress of the algorithm. (default: FALSE)}
 }

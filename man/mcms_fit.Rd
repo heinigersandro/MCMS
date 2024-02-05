@@ -7,14 +7,14 @@ If post_estimation is set, then the estimated parameters are returned additional
 \usage{
 mcms_fit(
   M,
-  X,
-  Z,
-  B,
   mask,
   lambda_L,
-  lambda_H,
-  lambda_b,
-  num_B_cov,
+  lambda_H = 0,
+  lambda_b = 0,
+  X = NA,
+  Z = NA,
+  B = NA,
+  num_B_cov = NA,
   to_add_ID = TRUE,
   to_estimate_u = TRUE,
   to_estimate_v = TRUE,
@@ -24,17 +24,14 @@ mcms_fit(
   rel_tol = 1e-05,
   to_normalize = TRUE,
   is_quiet = FALSE,
-  post_estimation = TRUE
+  post_estimation = TRUE,
+  impose_null = TRUE,
+  permutation_inference = "all",
+  permutation_max = 1000
 )
 }
 \arguments{
 \item{M}{Outcome matrix}
-
-\item{X}{Units covariate matrix (Time-invariant)}
-
-\item{Z}{Time covariate matrix (Unit-invariant)}
-
-\item{B}{Unit-Time covariate matrix}
 
 \item{mask}{Treatment mask matrix (1 if control, 0 if treated)}
 
@@ -43,6 +40,12 @@ mcms_fit(
 \item{lambda_H}{lambda value for unit and time covariate linking matrix regularization}
 
 \item{lambda_b}{lambda value for unit-time covariate regularization}
+
+\item{X}{Units covariate matrix (Time-invariant)}
+
+\item{Z}{Time covariate matrix (Unit-invariant)}
+
+\item{B}{Unit-Time covariate matrix}
 
 \item{num_B_cov}{Number of unit-time covariates}
 
@@ -65,6 +68,12 @@ mcms_fit(
 \item{is_quiet}{Whether to print the progress of the algorithm. (default: FALSE)}
 
 \item{post_estimation}{Whether a post regularization estimation without regularization should be estimated}
+
+\item{impose_null}{Whether null-hypothesis should be imposed. Implies that all observations also treated observations are used in model estimation. (default: TRUE)}
+
+\item{permutation_inference}{Permutation setting for inference procedure. Either "block-moving" under stationarity assumption, "all" under iid assumption or NA if no inference procedure should be executed. Is only possible if impose_null is set to TRUE. (default: "all")}
+
+\item{permutation_max}{Maximum of evaluated permutations. If NA, all possible permutations are considered (default: NA)}
 }
 \value{
 : List containing the following elements:
@@ -72,7 +81,8 @@ mcms_fit(
 		- "v": Estimated time's fixed effects
 		- "B": Estimated unit-time covariates' coefficients
 		- "H": Estimated H matrix
-		- "tau": The estimate treatment effect
+		- "tau": The estimate of the treatment effect
+		- "tau_rot": Rule-of-thumb corrected estimate of the treatment effect
 		- "lambda_L": Estimated lambda_L value
 		- "lambda_H": Estimated lambda_H value
 		- "lambda_b": Estimated lambda_b value

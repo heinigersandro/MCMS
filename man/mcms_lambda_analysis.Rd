@@ -7,11 +7,11 @@ If post_estimation is set, then the estimated parameters are returned additional
 \usage{
 mcms_lambda_analysis(
   M,
-  X,
-  Z,
-  B,
   mask,
-  num_B_cov,
+  X = NA,
+  Z = NA,
+  B = NA,
+  num_B_cov = NA,
   to_normalize = TRUE,
   to_estimate_u = TRUE,
   to_estimate_v = TRUE,
@@ -27,6 +27,7 @@ mcms_lambda_analysis(
   num_folds = 3,
   cube_search = TRUE,
   post_estimation = TRUE,
+  impose_null = TRUE,
   model_selection_H = TRUE,
   model_selection_b = TRUE,
   iter_lambda = 100,
@@ -37,15 +38,15 @@ mcms_lambda_analysis(
 \arguments{
 \item{M}{Outcome matrix}
 
-\item{X}{Units covariate matrix (Time-invariant)}
-
-\item{Z}{Time covariate matrix (Unit-invariant)}
-
-\item{B}{Unit-Time covariate matrix}
-
 \item{mask}{Treatment mask matrix (1 if control, 0 if treated)}
 
-\item{num_B_cov}{Number of unit-time covariates}
+\item{X}{Units covariate matrix (Time-invariant) (default: NA)}
+
+\item{Z}{Time covariate matrix (Unit-invariant) (default: NA)}
+
+\item{B}{Unit-Time covariate matrix (default: NA)}
+
+\item{num_B_cov}{Number of unit-time covariates (default: NA)}
 
 \item{to_normalize}{Whether to normalize the X, Z, and B matrices. (default: TRUE)}
 
@@ -76,6 +77,8 @@ If set to true, then configurations are evaluated in a hypercube fashion with zo
 If set to false, lambda values are spaned on a grid.}
 
 \item{post_estimation}{Whether a post regularization estimation without regularization should be estimated. (default: TRUE)}
+
+\item{impose_null}{Whether null-hypothesis should be imposed. Implies that all observations also treated observations are used in model estimation. (default: TRUE)}
 
 \item{model_selection_H}{Whether the unit and time varying covariate link matrix should be regularized. (default: TRUE)}
 
